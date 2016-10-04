@@ -3,6 +3,9 @@ using System.Collections;
 
 public class TestTouch : MonoBehaviour {
 
+	[SerializeField]
+	GameObject depthBulletPrefab;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -25,6 +28,9 @@ public class TestTouch : MonoBehaviour {
 //			transform.localPosition = ray.origin;
 			transform.position = ray.origin;
 			transform.LookAt(transform.position + ray.direction);
+
+			GameObject bullet = Instantiate(depthBulletPrefab);
+			bullet.transform.position = ray.origin;
 		}
 	}
 }
