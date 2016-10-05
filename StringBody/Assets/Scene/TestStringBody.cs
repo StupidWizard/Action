@@ -17,7 +17,7 @@ public class TestStringBody : MonoBehaviour {
 	List<RectTransform> listBody = new List<RectTransform>();
 
 	[SerializeField]
-	int N_CELL = 10;
+	int N_CELL = 30;
 
 	[SerializeField]
 	float cellSize = 16;
@@ -26,13 +26,13 @@ public class TestStringBody : MonoBehaviour {
 	List<Vector2> listPos = new List<Vector2>();
 
 	[SerializeField]
-	Vector2 direct = Vector2.up;
+	Vector2 direct = Vector2.up;		// default: move up
 
 	[SerializeField]
-	float velocityTurn = 30;
+	float velocityTurn = 270;
 
 	[SerializeField]
-	float velocityRun = 100;
+	float velocityRun = 360;
 
 	// Use this for initialization
 	void Start () {
@@ -43,6 +43,7 @@ public class TestStringBody : MonoBehaviour {
 	void Update () {
 		UpdateDirect();
 
+		// debug: only update position for listBody when pressing M
 		if (Input.GetKey(KeyCode.M)) {
 			UpdateMove();
 		}
@@ -52,7 +53,7 @@ public class TestStringBody : MonoBehaviour {
 		var headPos = head.anchoredPosition;
 		headPos += velocityRun * direct * Time.deltaTime;
 		var offsetHead = headPos - listPos[0];
-		while (offsetHead.magnitude > cellSize) {
+		while (offsetHead.magnitude > cellSize) {		// if device too slow, offset >> cellSize => use while to smooth.
 			// update listPos
 			Vector2 headNextPos = listPos[0] + offsetHead.normalized * cellSize;
 			UpdateListPos(headNextPos);
@@ -69,6 +70,7 @@ public class TestStringBody : MonoBehaviour {
 	public float ratio;
 	void UpdateBodyVisible(float ratio) {
 		for (int i = 0; i < listBody.Count; i++) {
+			// savedPos of body[i] is listPos[i+1].  listPos[0] is savedPos of Head.
 			listBody[i].anchoredPosition = listPos[i] * ratio + listPos[i+1] * (1 - ratio);
 		}
 	}
@@ -82,19 +84,25 @@ public class TestStringBody : MonoBehaviour {
 
 	public float axisX;
 	void UpdateDirect() {
+		// get event of Left/Right key
 		axisX = Input.GetAxis("Horizontal");
 
+		// turn left/right. (Rotate vector_Direct with deltaAngle)
 		float deltaAngle = axisX * velocityTurn * Time.deltaTime * Mathf.Deg2Rad;
 		float x = direct.x * Mathf.Cos(deltaAngle) + direct.y * Mathf.Sin(deltaAngle);
 		float y = direct.y * Mathf.Cos(deltaAngle) - direct.x * Mathf.Sin(deltaAngle);
 		direct.Set(x, y);
 		direct.Normalize();
 
+		UpdateHeadVisibleRot();
+	}
+
+	void UpdateHeadVisibleRot() {
 		float angle = Mathf.Acos(direct.x) * Mathf.Rad2Deg;
 		if (direct.y < 0) {
 			angle = -angle;
 		}
-		head.localRotation = Quaternion.Euler(0, 0, angle - 90);
+		head.localRotation = Quaternion.Euler(0, 0, angle - 90);		// default direct of Head_Image is up (upRot = 90).
 	}
 
 	[ContextMenu("Create")]
@@ -106,7 +114,7 @@ public class TestStringBody : MonoBehaviour {
 		head.localRotation = Quaternion.identity;
 		listPos.Add(Vector2.zero);
 
-		// create by N_CELL
+		// create with number cell on body is N_CELL.
 		for (int i = N_CELL; i > 0; i--) {
 			RectTransform bodyCell = Instantiate(bodyPrefab);
 			listBody.Insert(0, bodyCell);
