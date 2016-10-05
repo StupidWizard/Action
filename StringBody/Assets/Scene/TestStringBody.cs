@@ -17,7 +17,7 @@ public class TestStringBody : MonoBehaviour {
 	List<RectTransform> listBody = new List<RectTransform>();
 
 	[SerializeField]
-	int N_CELL = 0;
+	int N_CELL = 10;
 
 	[SerializeField]
 	float cellSize = 16;
@@ -31,21 +31,53 @@ public class TestStringBody : MonoBehaviour {
 	[SerializeField]
 	float velocityTurn = 30;
 
+	[SerializeField]
+	float velocityRun = 100;
+
 	// Use this for initialization
 	void Start () {
-	
+		Create();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		UpdateDirect();
 
-		UpdatePos();
+		if (Input.GetKey(KeyCode.M)) {
+			UpdateMove();
+		}
 	}
 
-	void UpdatePos() {
+	void UpdateMove() {
 		var headPos = head.anchoredPosition;
+		headPos += velocityRun * direct * Time.deltaTime;
+		var offsetHead = headPos - listPos[0];
+		while (offsetHead.magnitude > cellSize) {
+			// update listPos
+			Vector2 headNextPos = listPos[0] + offsetHead.normalized * cellSize;
+			UpdateListPos(headNextPos);
 
+			offsetHead = headPos - listPos[0];
+		}
+
+		ratio = offsetHead.magnitude / cellSize;
+		// update body visible
+		UpdateBodyVisible(ratio);
+		head.anchoredPosition = headPos;
+	}
+
+	public float ratio;
+	void UpdateBodyVisible(float ratio) {
+		for (int i = 0; i < listBody.Count; i++) {
+			listBody[i].anchoredPosition = listPos[i] * ratio + listPos[i+1] * (1 - ratio);
+		}
+	}
+
+	void UpdateListPos(Vector2 headNextPos) {
+		for (int i = listPos.Count-1; i > 0; i--) {
+			listPos[i] = listPos[i-1];
+		}
+		listPos[0] = headNextPos;
 	}
 
 	public float axisX;

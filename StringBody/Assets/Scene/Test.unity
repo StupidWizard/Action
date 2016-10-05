@@ -300,11 +300,13 @@ MonoBehaviour:
   bodyRoot: {fileID: 180875846}
   head: {fileID: 1921905377}
   listBody: []
-  N_CELL: 0
+  N_CELL: 30
   cellSize: 16
   listPos: []
   direct: {x: 0, y: 1}
-  velocityTurn: 30
+  velocityTurn: 90
+  velocityRun: 360
+  ratio: 0
   axisX: 0
 --- !u!1 &1406615689
 GameObject:
